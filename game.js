@@ -41,37 +41,54 @@ let mario = {
     jumpImage: "images/mario_jump.png",
 };
 
-// 預加載所有 Mario 圖片
+// 用於緩存加載的圖片
 const marioImages = {
-    runRight: mario.runRightFrames.map((src) => {
-        const img = new Image();
-        img.src = src;
-        return img;
-    }),
-    runLeft: mario.runLeftFrames.map((src) => {
-        const img = new Image();
-        img.src = src;
-        return img;
-    }),
-    idle: (() => {
-        const img = new Image();
-        img.src = mario.idleImage;
-        return img;
-    })(),
-    jump: (() => {
-        const img = new Image();
-        img.src = mario.jumpImage;
-        return img;
-    })(),
+    runRight: [],
+    runLeft: [],
+    idle: null,
+    jump: null
 };
+
+// 加載所有 Mario 圖片
+function loadImage(src, callback) {
+    const img = new Image();
+    img.src = src;
+    img.onload = () => callback(img);
+    img.onerror = () => console.error("Failed to load image: " + src);
+    return img;
+}
+
+// 加載所有圖片
+function preloadImages(callback) {
+    let imagesLoaded = 0;
+    let totalImages = mario.runRightFrames.length + mario.runLeftFrames.length + 3; // 3 是為了包含 idle 和 jump 圖片
+
+    // 加載 runRight 方向的圖片
+    mario.runRightFrames.forEach((src, index) => {
+        marioImages.runRight[index] = loadImage(src, imageLoaded);
+    });
+
+    // 加載 runLeft 方向的圖片
+    mario.runLeftFrames.forEach((src, index) => {
+        marioImages.runLeft[index] = loadImage(src, imageLoaded);
+    });
+
+    // 加載 idle 和 jump 圖片
+    marioImages.idle = loadImage(mario.idleImage, imageLoaded);
+    marioImages.jump = loadImage(mario.jumpImage, imageLoaded);
+
+    function imageLoaded() {
+        imagesLoaded++;
+        if (imagesLoaded === totalImages) {
+            callback(); // 所有圖片加載完成後啟動遊戲
+        }
+    }
+}
 
 // 畫布大小改變時自適應
 function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    if (canvas.width > canvas.height) {
-        canvas.width = canvas.height * 0.6; // 保持直向
-    }
     mario.x = canvas.width / 2 - mario.width / 2;
 }
 resizeCanvas();
@@ -153,5 +170,7 @@ document.addEventListener("touchend", () => {
     mario.direction = "idle";
 });
 
-// 開始遊戲循環
-update();
+// 開始遊戲
+preloadImages(() => {
+    update(); // 當所有圖片加載完成後開始遊戲循環
+});
