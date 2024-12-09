@@ -50,11 +50,9 @@ const marioImages = {
 };
 
 // 加載所有 Mario 圖片
-function loadImage(src, callback) {
+function loadImage(src) {
     const img = new Image();
     img.src = src;
-    img.onload = () => callback(img);
-    img.onerror = () => console.error("Failed to load image: " + src);
     return img;
 }
 
@@ -65,17 +63,21 @@ function preloadImages(callback) {
 
     // 加載 runRight 方向的圖片
     mario.runRightFrames.forEach((src, index) => {
-        marioImages.runRight[index] = loadImage(src, imageLoaded);
+        marioImages.runRight[index] = loadImage(src);
+        marioImages.runRight[index].onload = imageLoaded;
     });
 
     // 加載 runLeft 方向的圖片
     mario.runLeftFrames.forEach((src, index) => {
-        marioImages.runLeft[index] = loadImage(src, imageLoaded);
+        marioImages.runLeft[index] = loadImage(src);
+        marioImages.runLeft[index].onload = imageLoaded;
     });
 
     // 加載 idle 和 jump 圖片
-    marioImages.idle = loadImage(mario.idleImage, imageLoaded);
-    marioImages.jump = loadImage(mario.jumpImage, imageLoaded);
+    marioImages.idle = loadImage(mario.idleImage);
+    marioImages.idle.onload = imageLoaded;
+    marioImages.jump = loadImage(mario.jumpImage);
+    marioImages.jump.onload = imageLoaded;
 
     function imageLoaded() {
         imagesLoaded++;
