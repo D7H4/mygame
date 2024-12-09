@@ -14,36 +14,56 @@ let game = {
 
 // Mario 屬性
 let mario = {
-    x: canvas.width / 2 - 25,
+    x: canvas.width / 2 - 25, // 固定在畫布中間
     y: canvas.height - 100,
     width: 50,
     height: 70,
     velocityY: 0,
     gravity: 0.5,
     jumpCount: 0,
-    maxJumps: 1,  // 限制最多跳一次
+    maxJumps: 1,
     isJumping: false,
-    direction: "right",
-    frameIndex: 0,
-    frameRate: 5,
+    direction: "idle", // 初始方向
+    frameIndex: 0, // 當前動畫幀索引
+    frameRate: 5, // 幀切換速率
     frameCounter: 0,
     runRightFrames: [
-        "mario_run_right_1.png",
-        "mario_run_right_2.png",
-        "mario_run_right_3.png",
+        "images/mario_run_right_1.png",
+        "images/mario_run_right_2.png",
+        "images/mario_run_right_3.png",
     ],
     runLeftFrames: [
-        "mario_run_left_1.png",
-        "mario_run_left_2.png",
-        "mario_run_left_3.png",
+        "images/mario_run_left_1.png",
+        "images/mario_run_left_2.png",
+        "images/mario_run_left_3.png",
     ],
-    idleImage: "mario_idle.png",
-    jumpImage: "mario_jump.png",
+    idleImage: "images/mario_idle.png",
+    jumpImage: "images/mario_jump.png",
 };
 
-// Mario 當前顯示的圖片
-let marioImage = new Image();
-marioImage.src = mario.idleImage;
+// 預加載所有 Mario 圖片
+const marioImages = {
+    runRight: mario.runRightFrames.map((src) => {
+        const img = new Image();
+        img.src = src;
+        return img;
+    }),
+    runLeft: mario.runLeftFrames.map((src) => {
+        const img = new Image();
+        img.src = src;
+        return img;
+    }),
+    idle: (() => {
+        const img = new Image();
+        img.src = mario.idleImage;
+        return img;
+    })(),
+    jump: (() => {
+        const img = new Image();
+        img.src = mario.jumpImage;
+        return img;
+    })(),
+};
 
 // 畫布大小改變時自適應
 function resizeCanvas() {
@@ -71,6 +91,7 @@ function update() {
     mario.velocityY += mario.gravity;
     mario.y += mario.velocityY;
 
+    // 碰到地面時重置跳躍
     if (mario.y + mario.height > canvas.height) {
         mario.y = canvas.height - mario.height;
         mario.velocityY = 0;
@@ -89,19 +110,22 @@ function update() {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // 動態切換圖片
+    let currentImage;
     if (mario.isJumping) {
-        marioImage.src = mario.jumpImage;
+        currentImage = marioImages.jump;
     } else if (mario.direction === "right") {
-        marioImage.src = mario.runRightFrames[mario.frameIndex];
+        currentImage = marioImages.runRight[mario.frameIndex];
         updateMarioFrame();
     } else if (mario.direction === "left") {
-        marioImage.src = mario.runLeftFrames[mario.frameIndex];
+        currentImage = marioImages.runLeft[mario.frameIndex];
         updateMarioFrame();
     } else {
-        marioImage.src = mario.idleImage;
+        currentImage = marioImages.idle;
     }
 
-    ctx.drawImage(marioImage, mario.x, mario.y, mario.width, mario.height);
+    // 繪製 Mario
+    ctx.drawImage(currentImage, mario.x, mario.y, mario.width, mario.height);
 
     requestAnimationFrame(update);
 }
