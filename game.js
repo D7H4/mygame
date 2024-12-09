@@ -149,27 +149,19 @@ function update() {
     requestAnimationFrame(update);
 }
 
-// 手指觸摸開始時
-document.addEventListener("touchstart", (e) => {
-    const touchX = e.touches[0].clientX;
-    const touchY = e.touches[0].clientY;
-
-    if (touchX < canvas.width / 2) {
-        mario.direction = "left";
-    } else {
-        mario.direction = "right";
-    }
-
-    if (touchY < canvas.height / 2 && mario.jumpCount < mario.maxJumps) {
+// 虛擬按鈕事件
+document.getElementById("leftBtn").addEventListener("click", () => {
+    mario.direction = "left";
+});
+document.getElementById("rightBtn").addEventListener("click", () => {
+    mario.direction = "right";
+});
+document.getElementById("jumpBtn").addEventListener("click", () => {
+    if (mario.jumpCount < mario.maxJumps) {
         mario.velocityY = -10;
         mario.jumpCount++;
         mario.isJumping = true;
     }
-});
-
-// 手指觸摸結束時
-document.addEventListener("touchend", () => {
-    mario.direction = "idle";
 });
 
 // 開始遊戲
