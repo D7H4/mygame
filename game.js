@@ -65,25 +65,34 @@ function preloadImages(callback) {
     mario.runRightFrames.forEach((src, index) => {
         marioImages.runRight[index] = loadImage(src);
         marioImages.runRight[index].onload = imageLoaded;
+        marioImages.runRight[index].onerror = imageError;
     });
 
     // 加載 runLeft 方向的圖片
     mario.runLeftFrames.forEach((src, index) => {
         marioImages.runLeft[index] = loadImage(src);
         marioImages.runLeft[index].onload = imageLoaded;
+        marioImages.runLeft[index].onerror = imageError;
     });
 
     // 加載 idle 和 jump 圖片
     marioImages.idle = loadImage(mario.idleImage);
     marioImages.idle.onload = imageLoaded;
+    marioImages.idle.onerror = imageError;
     marioImages.jump = loadImage(mario.jumpImage);
     marioImages.jump.onload = imageLoaded;
+    marioImages.jump.onerror = imageError;
 
     function imageLoaded() {
         imagesLoaded++;
+        console.log(`圖片加載完成: ${imagesLoaded}/${totalImages}`);
         if (imagesLoaded === totalImages) {
             callback(); // 所有圖片加載完成後啟動遊戲
         }
+    }
+
+    function imageError() {
+        console.error("圖片加載錯誤:", this.src);
     }
 }
 
