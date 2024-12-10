@@ -27,6 +27,8 @@ let mario = {
     frameIndex: 0,
     frameRate: 5,
     frameCounter: 0,
+    isMovingLeft: false,
+    isMovingRight: false,
     runRightFrames: [
         "images/mario_run_right_1.png",
         "images/mario_run_right_2.png",
@@ -114,6 +116,7 @@ function update() {
     mario.velocityY += mario.gravity;
     mario.y += mario.velocityY;
 
+    // 碰到地面時重置跳躍
     if (mario.y + mario.height > canvas.height) {
         mario.y = canvas.height - mario.height;
         mario.velocityY = 0;
@@ -121,7 +124,18 @@ function update() {
         mario.isJumping = false;
     }
 
-    // 更新畫面
+    // 移動邏輯
+    if (mario.isMovingLeft) {
+        mario.direction = "left";
+        mario.x -= game.speed;
+    } else if (mario.isMovingRight) {
+        mario.direction = "right";
+        mario.x += game.speed;
+    } else {
+        mario.direction = "idle";
+    }
+
+    // 動態切換圖片
     let currentImage;
     if (mario.isJumping) {
         currentImage = marioImages.jump;
@@ -143,19 +157,27 @@ function update() {
     requestAnimationFrame(update);
 }
 
-// 虛擬按鈕控制
-document.getElementById("leftBtn").addEventListener("click", () => {
-    mario.direction = "left";
-});
-document.getElementById("rightBtn").addEventListener("click", () => {
-    mario.direction = "right";
-});
-document.getElementById("jumpBtn").addEventListener("click", () => {
-    if (mario.jumpCount < mario.maxJumps) {
-        mario.velocityY = -10;
-        mario.jumpCount++;
-        mario.isJumping = true;
+// 觸控事件
+canvas.addEventListener("touchstart", (e) => {
+    const touch = e.touches[0];
+    const touchX = touch.clientX;
+
+    if (touchX < canvas.width / 3) {
+        mario.isMovingLeft = true;
+    } else if (touchX > (2 * canvas.width) / 3) {
+        mario.isMovingRight = true;
+    } else {
+        if (mario.jumpCount < mario.maxJumps) {
+            mario.velocityY = -10;
+            mario.jumpCount++;
+            mario.isJumping = true;
+        }
     }
+});
+
+canvas.addEventListener("touchend", (e) => {
+    mario.isMovingLeft = false;
+    mario.isMovingRight = false;
 });
 
 // 開始遊戲
